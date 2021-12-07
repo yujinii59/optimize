@@ -54,15 +54,32 @@ try:
     print('목적식 결과 : %g' % m.objval)
     print(m.getAttr('x', load))
 
+
+    m.remove(m.getConstrByName('load_sum_constr'))
     for c in client:
-        m.addConstr(isinstance(load[c] / condition[c][1], int) == True, name='load_constr3' + c)
+        m.remove(m.getConstrByName('load_constr'+c))
+        m.remove(m.getConstrByName('load_constr2'+c))
+
+    # set variable
+    load_int = m.addVars(client, name='load_int_var', vtype=GRB.INTEGER)
+
+    # set object
+    obj = sum((condition[c][2] - condition[c][3] * condition[c][1]) * load_int[c] for c in client)
+    m.setObjective(obj, GRB.MAXIMIZE)
+
+    # add constraint
+    load_int_sum = sum(load_int[c] * condition[c][1] for c in client)
+    m.addConstr(load_int_sum == capa, name='load_int_sum_constr')
+    for c in client:
+        m.addConstr(load_int[c] >= 0, name='load_int_constr' + c)
+        m.addConstr(load_int[c] <= condition[c][0], name='load_constr2' + c)
 
 
     # optimize
     m.optimize()
     m.write("OPT_8_3.lp")  # 진행 기록가능
-    #print('목적식 결과 : %g' % m.objval)
-    print(m.getAttr('x', load))
+    print('목적식 결과 : %g' % m.objval)
+    print(m.getAttr('x', load_int))
 
 except gp.GurobiError as e:
     print('error : ' + e)
