@@ -53,10 +53,10 @@ try:
     first = m.objval
     m.write("first_problem.lp")     # 진행 기록가능
 
-    # for s in START_TIME:
-    #     for i in PRED[s]:
-    #         c = m.getConstrByName('start_constr'+s+'_'+i)
-    #         m.remove(c)
+    for s in START_TIME:
+       for i in PRED[s]:
+            c = m.getConstrByName('start_constr'+s+'_'+i)
+            m.remove(c)
 
 
 
