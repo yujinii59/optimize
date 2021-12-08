@@ -1,6 +1,6 @@
 import gurobipy as gp
 from gurobipy import GRB
-import numpy as np
+from pandas import DataFrame
 from itertools import product
 
 try:
@@ -23,7 +23,6 @@ try:
     for c in client:
         price_per_lot[c] = condition[c][2] / condition[c][1]
         quantity[c] = condition[c][0] * condition[c][1]
-    print(price_per_lot)
 
     # set variable
     load = m.addVars(client, name='load_var')
@@ -42,7 +41,10 @@ try:
     m.optimize()
     m.write("OPT_8_1.lp")  # 진행 기록가능
     print('목적식 결과 : %g' % m.objval)
-    print(m.getAttr('x', load))
+    load_df = dict()
+    for c in client:
+        load_df[c] = list()
+        load_df[c].append(m.getAttr('x', load)[c] / condition[c][1])
 
     # 2
     for c in client:
@@ -52,7 +54,8 @@ try:
     m.optimize()
     m.write("OPT_8_2.lp")  # 진행 기록가능
     print('목적식 결과 : %g' % m.objval)
-    print(m.getAttr('x', load))
+    for c in client:
+        load_df[c].append(m.getAttr('x', load)[c] / condition[c][1])
 
 
     m.remove(m.getConstrByName('load_sum_constr'))
@@ -79,7 +82,10 @@ try:
     m.optimize()
     m.write("OPT_8_3.lp")  # 진행 기록가능
     print('목적식 결과 : %g' % m.objval)
-    print(m.getAttr('x', load_int))
+    for c in client:
+        load_df[c].append(m.getAttr('x', load_int)[c])
+    df = DataFrame(load_df, index=['#1 result','#2 result','#3 result'])
+    print(df)
 
 except gp.GurobiError as e:
     print('error : ' + e)
