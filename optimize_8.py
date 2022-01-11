@@ -1,7 +1,6 @@
 import gurobipy as gp
 from gurobipy import GRB
 from pandas import DataFrame
-from itertools import product
 
 try:
     # set model
